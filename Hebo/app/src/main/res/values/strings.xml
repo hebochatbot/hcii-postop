@@ -1,3 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hebo</string>
+    <string-array name="body_parts">
+        <item>Scalp</item>
+        <item>Front or side of neck</item>
+        <item>Back of neck</item>
+        <item>Ears</item>
+        <item>Eyelids</item>
+        <item>Nose</item>
+        <item>Mouth</item>
+        <item>Forehead</item>
+        <item>Cheek</item>
+    </string-array>
 </resources>

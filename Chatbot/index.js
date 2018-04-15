@@ -1,4 +1,11 @@
 const FORTY_EIGHT_HOURS_LATER = 2; // days
+const FORTY_EIGHT_HOURS_IN_MS = 172800000;
+
+
+const isAfterFortyEightHours = (timeOfSurgery, timeOfNow) => {
+    const timeElapsed = timeOfNow - timeOfSurgery;
+    return timeElapsed >= FORTY_EIGHT_HOURS_IN_MS;
+}
 
 /*
 * HTTP Cloud Function.
