@@ -197,6 +197,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String speech_text = matches.get(0);
         String param_text = "";
 
+        Calendar c = Calendar.getInstance();
+        String currentDate = getDate(c);
+        String currentTime = getTime(c);
+
+        DATE_TIME = sharedPref.getString("date", currentDate) + " at " + sharedPref.getString("time", currentTime);
+        BODY_PART = sharedPref.getString("bodyPart", "head");
+
         if (isFollowUp) {
             param_text = speech_text;
         } else {
