@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             addMessage("Hello there! How are you doing, and how can I help?", true);
         }
 
-
         // Configure speech to text
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
@@ -121,6 +120,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
         });
 
+        // if first time user, bring up onboarding activity
+        boolean isUserFirstTime = Boolean.valueOf(sharedPref.getString("isFirstTimeUser", "true"));
+        Intent introIntent = new Intent(MainActivity.this, Onboarding.class);
+
+        if (isUserFirstTime) startActivity(introIntent);
     }
 
     @Override

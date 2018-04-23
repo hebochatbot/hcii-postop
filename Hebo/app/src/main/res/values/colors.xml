@@ -3,4 +3,8 @@
     <color name="colorPrimary">#f5a623</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#eeeeee</color>
+
+    <color name="indicator_unselected">#FFFFFF</color>
+    <color name="indicator_selected">#f5a623</color>
+    <color name="indicator_outline">#9E9E9E</color>
 </resources>

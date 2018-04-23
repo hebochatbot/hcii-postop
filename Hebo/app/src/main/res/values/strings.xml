@@ -12,4 +12,19 @@
         <item>Forehead</item>
         <item>Cheek</item>
     </string-array>
+
+    <string name="title_activity_onboarding">Onboarding</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="onboarding1_header">Hi, I\'m Hebo</string>
+    <string name="onboarding1_body">I\'m your personal health bot</string>
+
+    <string name="onboarding2_header">Ask me your questions!</string>
+    <string name="onboarding2_body">I\'m here to answer any questions you have about bleeding or wound care</string>
+
+    <string name="onboarding3_header">Just tap and ask</string>
+    <string name="onboarding3_body">Anytime you want to ask me something, just tap and I\'ll tell you what I know!</string>
+
+    <string name="onboarding_confirmation">Got it!</string>
 </resources>

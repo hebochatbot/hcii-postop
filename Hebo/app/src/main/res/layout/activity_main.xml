@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_rectangle_help"
-        android:fontFamily="@font/sfpro_thin_italics"
+        android:fontFamily="@font/roboto_regular"
         android:onClick="listenProfileOnClick"
         android:maxWidth="240dp"
         android:paddingBottom="8dp"
