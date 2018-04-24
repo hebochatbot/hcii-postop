@@ -1,5 +1,6 @@
 package postop.hcii.hebo;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -7,8 +8,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -84,22 +88,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mMessageRecycler.setLayoutManager(new LinearLayoutManager(this));
         mMessageRecycler.setAdapter(mMessageAdapter);
 
-        // Grant permissions
-        if (android.support.v4.content.ContextCompat.checkSelfPermission(MainActivity.this,
-                android.Manifest.permission.RECORD_AUDIO)
-            != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
-            if (android.support.v4.app.ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    android.Manifest.permission.RECORD_AUDIO)) {
-                addMessage("Hello there! My name is Hebo, in order to talk to me, please grant microphone permissions", true);
-                android.support.v4.app.ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{android.Manifest.permission.RECORD_AUDIO},
-                        MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-            }
-        } else {
-            addMessage("Hello there! How are you doing, and how can I help?", true);
-        }
-
         // Configure speech to text
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
@@ -131,10 +119,15 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         // if first time user, bring up onboarding activity
         boolean isUserFirstTime = Boolean.valueOf(sharedPref.getString("isFirstTimeUser", "true"));
         Intent introIntent = new Intent(MainActivity.this, Onboarding.class);
-        if (isUserFirstTime) startActivity(introIntent);
+//        if (isUserFirstTime) { TODO: REMOVE WHEN NOT TESTING
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.clear().commit();
+            startActivity(introIntent);
+//        }
 
-        // bring up consent
+        // bring up consent & permissions
         if (!gaveConsent) createConsentDialog();
+        if (doesNotHavePermission()) getPermissions();
     }
 
     @Override
@@ -154,6 +147,24 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
+    private void getPermissions() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.RECORD_AUDIO)) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{android.Manifest.permission.RECORD_AUDIO},
+                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+        } else {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{android.Manifest.permission.RECORD_AUDIO},
+                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+        };
+    }
+
+    private boolean doesNotHavePermission() {
+        return (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED);
+    }
+
     public void addMessage(String msg, boolean isHebo) {
         Message myMessage = new Message(msg, isHebo);
         messageList.add(myMessage);
@@ -165,7 +176,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     public void listenButtonOnClick(final View view) {
         gaveConsent = sharedPref.getBoolean("consent", false);
-        if (gaveConsent) speech.startListening(recognizerIntent);
+        if (gaveConsent) {
+            if (doesNotHavePermission()) {
+                getPermissions();
+            } else {
+                speech.startListening(recognizerIntent);
+            }
+        }
         else createConsentDialog();
     }
 
@@ -191,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onError(int errorCode) {
         if (errorCode != SpeechRecognizer.ERROR_CLIENT) {
             String errorMessage = getErrorText(errorCode);
-            addMessage(errorMessage, false);
+            addMessage(errorMessage, true);
         }
     }
 
@@ -326,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 message = "Client side error";
                 break;
             case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                message = "Insufficient permissions";
+                message = "Permission error";
                 break;
             case SpeechRecognizer.ERROR_NETWORK:
                 message = "Network error";
@@ -344,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 message = "error from server";
                 break;
             case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                message = "No speech input";
+                message = "Sorry! I didn't catch that. Please try again.";
                 break;
             default:
                 message = "Didn't understand, please try again.";
@@ -395,6 +412,5 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
         });
     }
-
 }
 

@@ -30,51 +30,57 @@
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:fontFamily="@font/roboto_regular"
         android:lineSpacingExtra="@dimen/activity_margin_half"
-        android:padding="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_margin_half"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_vertical_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
         android:text="@string/consent_content"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/consentTitle" />
 
-    <Button
-        android:id="@+id/agreeButton"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginLeft="@dimen/activity_margin_half"
-        android:layout_marginRight="@dimen/activity_margin_half"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:background="#fff"
-        android:text="@string/consent_dialog_agree"
-        android:textColor="@color/dialogConfirm"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/cancelButton"
-        app:layout_constraintTop_toBottomOf="@+id/consentContent" />
-
-    <Button
-        android:id="@+id/cancelButton"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/bgColor"
-        android:text="@string/consent_dialog_cancel"
-        android:textColor="@color/dialogConfirm"
-        app:layout_constraintStart_toEndOf="@+id/space"
-        app:layout_constraintTop_toBottomOf="@+id/consentContent" />
-
-    <Space
-        android:id="@+id/space"
-        android:layout_width="112dp"
-        android:layout_height="44dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cancelButton" />
+        app:layout_constraintTop_toBottomOf="@+id/consentContent">
+
+        <Button
+            android:id="@+id/cancelButton"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@color/bgColor"
+            android:text="@string/consent_dialog_cancel"
+            android:textColor="@color/dialogConfirm"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/consentContent" />
+
+        <Button
+            android:id="@+id/agreeButton"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:background="#fff"
+            android:gravity="center"
+            android:text="@string/consent_dialog_agree"
+            android:textColor="@color/dialogConfirm"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/consentContent" />
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

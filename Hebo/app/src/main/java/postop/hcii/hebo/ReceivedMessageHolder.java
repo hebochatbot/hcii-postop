@@ -13,8 +13,8 @@ class ReceivedMessageHolder extends RecyclerView.ViewHolder {
         super(itemView);
         messageText = (TextView) itemView.findViewById(R.id.text_message_body);
 //        timeText = (TextView) itemView.findViewById(R.id.text_message_time);
-        nameText = (TextView) itemView.findViewById(R.id.text_message_name);
-        profileImage = (ImageView) itemView.findViewById(R.id.image_message_profile);
+//        nameText = (TextView) itemView.findViewById(R.id.text_message_name);
+//        profileImage = (ImageView) itemView.findViewById(R.id.image_message_profile);
     }
 
     void bind(Message message) {
@@ -22,7 +22,7 @@ class ReceivedMessageHolder extends RecyclerView.ViewHolder {
 
         // Format the stored timestamp into a readable String using method.
 //        timeText.setText(message.getCreatedAt());
-        nameText.setText("Hebo");
+//        nameText.setText("Hebo");
 
 //        // Insert the profile image from the URL into the ImageView.
 //        Utils.displayRoundImageFromUrl(mContext, message.getSender().getProfileUrl(), profileImage);
