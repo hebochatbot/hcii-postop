@@ -4,9 +4,13 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -53,5 +57,20 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         TextView timeText = (TextView) getActivity().findViewById(R.id.timeText);
         String time = Integer.toString(hourOfDay)  + ":" +  minuteText + " " + am_pm;
         timeText.setText(time);
+
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("profile", Context.MODE_PRIVATE);
+        int profileScore = sharedPref.getInt("profileScore", 0);
+        profileScore |= Config.PROFILE_TIME;
+
+        Log.d("TIME PICKER", Integer.toString(profileScore));
+        if (ProfileActivity.isFilled(profileScore)) {
+            Button saveButton = (Button) getActivity().findViewById(R.id.button);
+            saveButton.setEnabled(true);
+            saveButton.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        } else {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt("profileScore", profileScore);
+            editor.commit();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package postop.hcii.hebo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -80,6 +81,8 @@ public class Onboarding extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 saveSharedSetting(Onboarding.this, "isFirstTimeUser", "false");
+                Intent profileIntent = new Intent(Onboarding.this, ProfileActivity.class);
+                startActivity(profileIntent);
                 finish();
             }
         });

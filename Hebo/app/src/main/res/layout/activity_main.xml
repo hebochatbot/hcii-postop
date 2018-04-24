@@ -18,8 +18,23 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:rippleColor="@color/colorPrimary"
-        app:srcCompat="@drawable/mic" />
-
+        app:backgroundTint="#ffffff"
+        app:borderWidth="0dp"
+        app:srcCompat="@drawable/hebo" />
+<!--
+    <ImageView
+        android:id="@+id/listenButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:onClick="listenButtonOnClick"
+        android:paddingBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/hebo" />
+!-->
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_message_list"
         android:layout_width="0dp"
