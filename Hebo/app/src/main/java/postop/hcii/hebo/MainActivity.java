@@ -34,6 +34,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.MotionEvent;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity implements RecognitionListener {
 
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private String BODY_PART;
     private String DATE_TIME;
 
-    private FloatingActionButton listenButton;
+    private ImageView listenButton;
     private android.os.Handler mHandler = new android.os.Handler();
     private RecyclerView mMessageRecycler;
     private MessageListAdapter mMessageAdapter;
@@ -67,10 +68,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         sharedPref = this.getSharedPreferences("profile", Context.MODE_PRIVATE);
         DATE_TIME = sharedPref.getString("date", currentDate) + " at " + sharedPref.getString("time", currentTime);
-        BODY_PART = sharedPref.getString("bodyPart", "head");
+        BODY_PART = sharedPref.getString("bodyPart", Config.DEFAULT_SITE);
 
         messageList = new LinkedList<>();
-        listenButton = (FloatingActionButton) findViewById(R.id.listenButton);
+        listenButton = (ImageView) findViewById(R.id.listenButton);
         mMessageRecycler = (RecyclerView) findViewById(R.id.recyclerview_message_list);
         mMessageAdapter = new MessageListAdapter(this, messageList);
         mMessageRecycler.setLayoutManager(new LinearLayoutManager(this));

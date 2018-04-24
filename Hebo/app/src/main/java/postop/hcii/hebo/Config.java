@@ -12,4 +12,5 @@ package postop.hcii.hebo;
     public static final int PROFILE_TIME = 0x4;
     public static final int PROFILE_CLINIC = 0x8;
     public static final int PROFILE_COMPLETE = 0xF;
+    public static final String DEFAULT_SITE = "head";
  }

@@ -6,40 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/listenButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="80dp"
-        android:onClick="listenButtonOnClick"
-        android:paddingBottom="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:rippleColor="@color/colorPrimary"
-        app:backgroundTint="#ffffff"
-        app:borderWidth="0dp"
-        app:srcCompat="@drawable/hebo" />
-<!--
     <ImageView
         android:id="@+id/listenButton"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/hebo_button"
+        android:layout_height="@dimen/hebo_button"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="@dimen/hebo_margin"
         android:onClick="listenButtonOnClick"
-        android:paddingBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/hebo" />
-!-->
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_message_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="32dp"
+
+        android:padding="@dimen/activity_horizontal_margin"
         app:layout_constraintBottom_toTopOf="@+id/listenButton"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -47,24 +31,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"></android.support.v7.widget.RecyclerView>
 
-    <TextView
-        android:id="@+id/help_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/rounded_rectangle_help"
-        android:fontFamily="@font/roboto_regular"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/profile_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:backgroundTint="@color/colorPrimary"
         android:onClick="listenProfileOnClick"
-        android:maxWidth="240dp"
-        android:paddingBottom="8dp"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
-        android:paddingTop="8dp"
-        android:text="Edit profile"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="0dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_person_white_24dp"
+        app:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_person_white_24dp" />
 
 </android.support.constraint.ConstraintLayout>
