@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Main !-->
     <string name="app_name">Hebo</string>
     <string name="title_activity_onboarding">Onboarding</string>
+    <string name="consent_dialog_agree">I Agree</string>
+    <string name="consent_dialog_cancel">Cancel</string>
+    <string name="consent_title">Consent form</string>
+    <string name="consent_content">I understand that this application is for research purposes and that anonymized data can be used to support future development. The data collected from me will include the questions I ask in addition to how often they are asked to Hebo, however, personal information such as name, procedure, and clinic will not be disclosed.</string>
 
     <!-- Profile !-->
     <string name="profile_text">Tell me about your procedure!</string>
@@ -36,4 +42,5 @@
     <string name="onboarding3_body">Anytime you want to ask me something, just tap and I\'ll tell you what I know!</string>
 
     <string name="onboarding_confirmation">Got it!</string>
+
 </resources>

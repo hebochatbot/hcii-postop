@@ -1,6 +1,10 @@
 package postop.hcii.hebo;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.speech.tts.TextToSpeech;
@@ -34,6 +38,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.MotionEvent;
+import android.widget.Button;
 import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity implements RecognitionListener {
@@ -44,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private boolean isFollowUp = false;
-    private String BODY_PART;
-    private String DATE_TIME;
+    private String BODY_PART, DATE_TIME;
+    private boolean gaveConsent;
 
     private ImageView listenButton;
     private android.os.Handler mHandler = new android.os.Handler();
@@ -56,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private AIDataService aiDataService;
     private TextToSpeech textToSpeech;
     private Config CONFIG;
+    private Button consentCancel, consentAgree;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         sharedPref = this.getSharedPreferences("profile", Context.MODE_PRIVATE);
         DATE_TIME = sharedPref.getString("date", currentDate) + " at " + sharedPref.getString("time", currentTime);
         BODY_PART = sharedPref.getString("bodyPart", Config.DEFAULT_SITE);
+        gaveConsent = sharedPref.getBoolean("consent", false);
 
         messageList = new LinkedList<>();
         listenButton = (ImageView) findViewById(R.id.listenButton);
@@ -124,8 +131,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         // if first time user, bring up onboarding activity
         boolean isUserFirstTime = Boolean.valueOf(sharedPref.getString("isFirstTimeUser", "true"));
         Intent introIntent = new Intent(MainActivity.this, Onboarding.class);
-
         if (isUserFirstTime) startActivity(introIntent);
+
+        // bring up consent
+        if (!gaveConsent) createConsentDialog();
     }
 
     @Override
@@ -155,7 +164,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
 
     public void listenButtonOnClick(final View view) {
-        speech.startListening(recognizerIntent);
+        gaveConsent = sharedPref.getBoolean("consent", false);
+        if (gaveConsent) speech.startListening(recognizerIntent);
+        else createConsentDialog();
     }
 
     public void listenProfileOnClick(final View view) {
@@ -358,4 +369,32 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         return Integer.toString(hour) + ":" + Integer.toString(minute) + am_pm;
     }
 
+    private void createConsentDialog() {
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.activity_consent, null);
+        mBuilder.setView(mView);
+        final AlertDialog dialog = mBuilder.create();
+        dialog.show();
+
+        consentAgree = (Button) mView.findViewById(R.id.agreeButton);
+        consentCancel = (Button) mView.findViewById(R.id.cancelButton);
+
+        consentAgree.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("consent", true);
+                editor.commit();
+            }
+        });
+        consentCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+    }
+
 }
+

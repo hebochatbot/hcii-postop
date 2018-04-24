@@ -4,6 +4,9 @@
     <color name="colorPrimary2">#FFF5E5</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#eeeeee</color>
+    <!--<color name="bgColor">#fffafaf</color>!-->
+    <color name="bgColor">#ffffff</color>
+    <color name="dialogConfirm">#00897B</color>
 
     <color name="indicator_unselected">#FFFFFF</color>
     <color name="indicator_selected">#f5a623</color>
