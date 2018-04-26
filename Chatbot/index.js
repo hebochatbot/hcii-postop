@@ -7,6 +7,11 @@ const isAfterFortyEightHours = (timeOfSurgery, timeOfNow) => {
     return timeElapsed >= FORTY_EIGHT_HOURS_IN_MS;
 }
 
+const upcomingSurgery = (timeOfSurgery, timeOfNow) => {
+    const timeElapsed = timeOfNow - timeOfSurgery;
+    return timeElapsed < 0;
+}
+
 /*
 * HTTP Cloud Function.
 *
@@ -55,16 +60,55 @@ exports.heboHttp = function heboHttp (req, res) {
         }
         break;
 
-      // DIALOG: 
+      // DIALOG:
+      // Can I shower?
       case "can-i-shower":
+        response = "You can bathe; the important thing is to not get the dressing wet. I always recommend a bath over a shower so that you can avoid getting your " + surgeryArea + " wet.";
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+            response = "You can let water run over your " + surgeryArea + ", but you should avoid putting it" +
+                       " directly in a stream of water.";
+        } else {
+            timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
+            response = "Please avoid getting the wound and dressing wet for now. Wait until 48 hours after your surgery, " +
+                        timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + ". When that time comes, let me know if you need any help!";
+        }
         break;
+
       case "do-i-do-the-same-dressing-as-my-doctor":
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+            response = "When you change your dressing at home, it will look smaller than the pressure dressing that your doctor used.";
+        } else {
+            timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
+            response = "When you change your dressing at home, it will look smaller than the pressure dressing that your doctor used. Be sure to wait until " +
+                        timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+        }
         break;
-      case "dressing-is-bleeding-less-than-48-hours-can-i-change-it":
+
+      // DIALOG:
+      // Do i do the same dressing that doc did?
+      // No do normal dressing. How?
+      case "do-i-do-the-same-dressing-as-my-doctor - how":
+        console.log("Show the visual answer of how to change your dressing.");
         break;
+
+
       case "dry-blood-stuck-to-dressing":
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+            response = "If your bandage is stuck to your wound, try applying a damp cloth to the area to help loosen the bandage. It's often better to have a bandage that's stuck than to pull too hard and potentially cause bleeding.";
+        } else {
+            timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
+            response = "I recommend you wait until " + timeOfSurgery.toDateString() + " at " +
+                       timeOfSurgery.toLocaleTimeString() + " to change your dressing. Once 48 hours has passed, you can use a damp cloth to help loosen your bandage, if it's still stuck.";
+        }
         break;
+
       case "help":
+        if (upcomingSurgery(timeOfSurgery, currentTime)) {
+          response = "Hi there! I can help you prepare for your surgery! I can answer questions about your surgery that relate to wound care, bleeding, or swelling. You can ask me a question like 'Will I be able to shower?'";
+        } else {
+          var exampleQuestions = ["When can I change my dressing?", "How do I change my dressing?", "Can I shower?", "How do I clean my wound?", "How can I avoid scarring?", "What if my dressing gets wet?"];
+          response = "Hi there! Hope your recovery is going well! I can answer questions about your surgery that relate to wound care, bleeding, or swelling. You can ask me a question like '" + exampleQuestions[Math.floor(Math.random() * exampleQuestions.length)] + "'";
+        }
         break;
       case "how-can-i-shower":
         break;
@@ -114,7 +158,15 @@ exports.heboHttp = function heboHttp (req, res) {
 
 
 
-
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+            response = "You can let water run over your " + surgeryArea + ", but you should avoid putting it" +
+                       " directly in a stream of water.";
+        } else {
+            timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
+            response = "Please avoid getting the wound and dressing wet for now. Wait until 48 hours after your surgery, " +
+                        timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + ". You can ask me again then for help.";
+        };
+        break;
 
 
 
