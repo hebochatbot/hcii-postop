@@ -24,15 +24,142 @@ exports.heboHttp = function heboHttp (req, res) {
     const surgeryArea = params["body-parts"];
 
     switch (intentName) {
+
+      // DIALOG
+      // Can I change my dressing?
+      // Is it still bleeding? I'm not sure.
+      // Let's check - is it? Yes.
+      // You should apply pressure instead. How?
+      case "can-i-change-dressing - unsure - yes - how":
+        console.log("visual answer for how to apply pressure");
+        break;
+
+      // DIALOG:
+      // Can I change my dressing?
+      // Is it still bleeding? Yes.
+      // You should apply pressure instead. How?
+      case "can-i-change-dressing - yes - how":
+        console.log("visual answer for how to apply pressure");
+        break;
+
+      // DIALOG:
+      // Can I change my dressing?
+      // Is it still bleeding? No.
+      // You should change only if after 48 hours...
+      case "can-i-change-dressing - no":
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+          response = "You can change your dressing now. You should be changing your dressing daily or when it gets wet.";
+        } else {
+          response = "I recommend you wait until " + timeOfSurgery.toDateString() + " at " +
+                     timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+        }
+        break;
+
+      // DIALOG: 
+      case "can-i-shower":
+        break;
+      case "do-i-do-the-same-dressing-as-my-doctor":
+        break;
+      case "dressing-is-bleeding-less-than-48-hours-can-i-change-it":
+        break;
+      case "dry-blood-stuck-to-dressing":
+        break;
+      case "help":
+        break;
+      case "how-can-i-shower":
+        break;
+      case "how-can-i-stop-my-bleeding":
+        // join this together with i am still bleeding and have a variable to track the last time the user said that to see if multiple times in a few hours
+        break;
+      case "how-do-i-change-my-dressing":
+        break;
+      case "how-do-i-keep-wound-from-drying-out":
+        break;
+      case "how-do-i-put-dressing-on-unseen-area":
+        break;
+      case "how-much-vaseline":
+        break;
+      case "how-often-can-i-change-my-dressing":
+        break;
+      case "how-to-clean-my-wound":
+        break;
+      case "how-to-reduce-scarring":
+        break;
+      case "is-bleeding-normal-right-now":
+        break;
+      case "is-it-ok-to-bleed-through-dressing":
+        break;
+      case "is-scabbing-normal":
+        break;
+      case "my-wound-is-itchy":
+        break;
+      case "ran-out-of-gauze":
+        break;
+      case "what-if-dressing-gets-wet":
+        break;
+      case "what-if-wound-hurts":
+        break;
+      case "what-level-of-bleeding-is-normal":
+        break;
+      case "what-should-i-do-if-the-dressing-is-falling-off":
+        break;
+      case "when-can-i-change-dressing":
+        break;
+      case "why-cant-i-get-the-wound-wet":
+        break;
+      case "wound-swelling":
+        break;
+      case "wound-swelling-rapidly":
+        break;
+
+
+
+
+
+
+
+
+      case "can-i-change-my-dressing":
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+          response = "You should be changing your dressing daily or when it gets wet.";
+        } else {
+          response = "I recommend you wait until " + timeOfSurgery.toDateString() + " at " +
+                     timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+        }
+        break;
+      case "Can-I-change-my-wound-dressing-if-it-is-before-48 hours-but-is-it-bleeding-through-my-dressing?":
+        // TO DO
+        console.log("This is where we show the visual picture for pressure right? halp.")
+        break;
+      case "can-i-shower":
+        response = "You can bathe; the important thing is to not get the dressing wet. We recommend a bath so that you can avoid getting your " + surgeryArea + " wet.";
+        break;
+      case "Do-I need-to-change-my dressing-if-it-is-bleeding-through-it? - no":
+        if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
+          response = "You can go ahead and change your dressing. If your wound is sticking to your dressing, you can try to use a damp cloth to help loosen it.";
+        } else {
+          response = "Don't worry about changing your dressing now! You should wait until " + timeOfSurgery.toDateString() + " at " +
+                     timeOfSurgery.toLocaleTimeString() + " to replace your pressure dressing.";
+        }
+        break;
+      default:
+        response = "I'm sorry, I don't think I know the answer to that question. I can only answer questions on bleeding, swelling, and wound care."
+
+
+
+
+
+
+
         case "how-should-i-secure-the-dressing - yes":
             params = contexts[0].parameters;
             timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
-            response = "This is the example intent. Don't shower until 48 hours after you surgery, which would be " + 
+            response = "This is the example intent. Don't shower until 48 hours after you surgery, which would be " +
                         timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString();
             break;
         case "other-example-intent":
             timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
-            response = "This is the other example intent. Don't shower until 48 hours after you surgery, which would be " + 
+            response = "This is the other example intent. Don't shower until 48 hours after you surgery, which would be " +
                         timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString();
             break;
         case "how-often-can-i-change-my-dressing":
@@ -82,11 +209,11 @@ exports.heboHttp = function heboHttp (req, res) {
             break;
         case ("how-can-i-shower"):
             if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
-                response = "You can let water run over your " + surgeryArea + ", but you should avoid putting it" + 
+                response = "You can let water run over your " + surgeryArea + ", but you should avoid putting it" +
                            " directly in a stream of water.";
             } else {
                 timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
-                response = "Please avoid getting the wound and dressing wet for now. Wait until 48 hours after your surgery, " + 
+                response = "Please avoid getting the wound and dressing wet for now. Wait until 48 hours after your surgery, " +
                             timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + ". You can ask me again then for help.";
             };
             break;
@@ -96,7 +223,7 @@ exports.heboHttp = function heboHttp (req, res) {
                            "increase the amount of vaseline applied and use non-stick pads.";
             } else {
                 timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
-                response = "Please don't try to change the dressing. You should wait until " + 
+                response = "Please don't try to change the dressing. You should wait until " +
                             timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + " to change your dressing. " +
                             "Please ask me then if the blood is still sticking to your dressing.";
             };
@@ -105,9 +232,9 @@ exports.heboHttp = function heboHttp (req, res) {
             response = "I'm sorry, I don't think I know the answer to that question. I can only answer questions on bleeding, swelling, and wound care."
     }
 
-  
+
     res.setHeader('Content-Type', 'application/json'); //Requires application/json MIME type
-    res.send(JSON.stringify({ "speech": response, "displayText": response 
+    res.send(JSON.stringify({ "speech": response, "displayText": response
     //"speech" is the spoken version of the response, "displayText" is the visual version
     }));
 };
