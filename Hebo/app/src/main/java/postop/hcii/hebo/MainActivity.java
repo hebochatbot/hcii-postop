@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -30,9 +31,12 @@ import ai.api.AIDataService;
 import ai.api.RequestExtras;
 import com.google.gson.JsonElement;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -48,6 +52,7 @@ import android.widget.ImageView;
 public class MainActivity extends AppCompatActivity implements RecognitionListener {
 
     public static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    public static final int VISUAL_ANSWER_OFFSET = 150;
     private SharedPreferences sharedPref;
 
     private SpeechRecognizer speech = null;
@@ -138,9 +143,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                     && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                    addMessage("Hello there! How are you doing, and how can I help?", true);
+                    addTextMessage("Hello there! How are you doing, and how can I help?", true);
                 } else {
-                    addMessage("Sorry, I can't help you unless you accept microphone permissions!", true);
+                    addTextMessage("Sorry, I can't help you unless you accept microphone permissions!", true);
                 }
                 return;
             }
@@ -165,14 +170,37 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED);
     }
 
-    public void addMessage(String msg, boolean isHebo) {
-        Message myMessage = new Message(msg, isHebo);
+    public void addTextMessage(String msg, boolean isHebo) {
+        int messageType = (isHebo) ? Config.MESSAGE_HEBO_TEXT : Config.MESSAGE_SENT;
+        Response response = new Response(msg, false);
+        List<Response> responseList = new ArrayList<>();
+        responseList.add(response);
+        Message myMessage = new Message(responseList, messageType);
         messageList.add(myMessage);
         int position = mMessageAdapter.getItemCount() - 1;
         mMessageAdapter.notifyItemInserted(position);
         mMessageRecycler.scrollToPosition(position);
     }
 
+    public void addVisualMessage(List<String> stringResponses) {
+        List<Response> responseList = new ArrayList<>();
+        String title = stringResponses.get(0); // first response is always the title
+        populateResponseList(responseList, stringResponses);
+        Message myMessage = new Message(responseList, Config.MESSAGE_HEBO_VISUAL, title);
+        messageList.add(myMessage);
+        int position = mMessageAdapter.getItemCount() - 1;
+        mMessageAdapter.notifyItemInserted(position);
+        mMessageRecycler.scrollBy(0, VISUAL_ANSWER_OFFSET);
+    }
+
+    public void populateResponseList(List<Response> responseList, List<String> stringList) {
+        for (int i = 1; i < stringList.size(); i++) {
+            String text = stringList.get(i);
+            boolean isImage = (text.charAt(0) == '_');
+            Response r = new Response(text, isImage);
+            responseList.add(r);
+        }
+    }
 
     public void listenButtonOnClick(final View view) {
         gaveConsent = sharedPref.getBoolean("consent", false);
@@ -208,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onError(int errorCode) {
         if (errorCode != SpeechRecognizer.ERROR_CLIENT) {
             String errorMessage = getErrorText(errorCode);
-            addMessage(errorMessage, true);
+            addTextMessage(errorMessage, true);
         }
     }
 
@@ -243,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             param_text = "(" + BODY_PART + ")" + " (" + DATE_TIME + ") " + speech_text;
         }
         sendRequest(param_text);
+        isFollowUp = false; // reset follow up
     }
 
     private void sendRequest(final String queryString) {
@@ -308,12 +337,26 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
 
         String speech = result.getFulfillment().getSpeech().toString();
-        if (speech.charAt(speech.length()-1) == '?') {
-            isFollowUp = true;
-        }
+        String displayText = result.getFulfillment().getDisplayText();
+        displayText = (displayText == null) ? speech : displayText;
 
-        addMessage(resolvedQuery, false);
-        addMessage(speech, true);
+        // follow up question, so do not send parameters next time
+        isFollowUp = (displayText.charAt(displayText.length()-1) == '?');
+
+        // display my text input
+        addTextMessage(resolvedQuery, false);
+
+        // is a visual answer, display visual response from Hebo
+        if (displayText.charAt(0) == '(' && displayText.charAt(displayText.length()-1) == ')') {
+            String visual_key = displayText.substring(1, displayText.length()-1);
+            Resources res = this.getResources();
+            int responsesId = res.getIdentifier(visual_key, "array", getPackageName());
+            final List<String> responses = Arrays.asList(res.getStringArray(responsesId));
+            addVisualMessage(responses);
+        } else {
+            // display text response from Hebo
+            addTextMessage(displayText, true);
+        }
 
         // Read out the response
         String toSpeak = speech;
@@ -324,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                addMessage(error.toString(), false);
+                addTextMessage(error.toString(), false);
             }
         });
     }

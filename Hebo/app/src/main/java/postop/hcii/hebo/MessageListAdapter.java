@@ -1,6 +1,8 @@
 package postop.hcii.hebo;
 
+import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,11 +10,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 public class MessageListAdapter extends RecyclerView.Adapter{
-    private static final int VIEW_TYPE_MESSAGE_SENT = 1; // my messages
-    private static final int VIEW_TYPE_MESSAGE_RECEIVED = 2; // Hebo's messages
+    private static final int VIEW_TYPE_MESSAGE_SENT = Config.MESSAGE_SENT;
+    private static final int VIEW_TYPE_MESSAGE_HEBO_TEXT = Config.MESSAGE_HEBO_TEXT;
+    private static final int VIEW_TYPE_MESSAGE_HEBO_VISUAL = Config.MESSAGE_HEBO_VISUAL;
 
     private Context mContext;
     private List<Message> mMessageList;
@@ -31,14 +36,7 @@ public class MessageListAdapter extends RecyclerView.Adapter{
     @Override
     public int getItemViewType(int position) {
         Message message = (Message) mMessageList.get(position);
-
-        if (message.isHebo()) {
-            // If the current user is Hebo
-            return VIEW_TYPE_MESSAGE_RECEIVED;
-        } else {
-            // I sent the message
-            return VIEW_TYPE_MESSAGE_SENT;
-        }
+        return message.getMessageType();
     }
 
     // Inflates the appropriate layout according to the ViewType.
@@ -46,17 +44,21 @@ public class MessageListAdapter extends RecyclerView.Adapter{
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
 
-        if (viewType == VIEW_TYPE_MESSAGE_SENT) {
-            view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_message_sent, parent, false);
-            return new SentMessageHolder(view);
-        } else if (viewType == VIEW_TYPE_MESSAGE_RECEIVED) {
-            view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_message_received, parent, false);
-            return new ReceivedMessageHolder(view);
+        switch (viewType) {
+            case VIEW_TYPE_MESSAGE_SENT:
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_message_sent, parent, false);
+                return new SentMessageHolder(view);
+            case VIEW_TYPE_MESSAGE_HEBO_TEXT:
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_message_hebo_text, parent, false);
+                return new HeboTextMessageHolder(view);
+            case VIEW_TYPE_MESSAGE_HEBO_VISUAL:
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_message_hebo_visual, parent, false);
+                return new HeboVisualMessageHolder(view);
+            default: return null;
         }
-
-        return null;
     }
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
@@ -68,41 +70,68 @@ public class MessageListAdapter extends RecyclerView.Adapter{
             case VIEW_TYPE_MESSAGE_SENT:
                 ((SentMessageHolder) holder).bind(message);
                 break;
-            case VIEW_TYPE_MESSAGE_RECEIVED:
-                ((ReceivedMessageHolder) holder).bind(message);
+            case VIEW_TYPE_MESSAGE_HEBO_TEXT:
+                ((HeboTextMessageHolder) holder).bind(message);
+                break;
+            case VIEW_TYPE_MESSAGE_HEBO_VISUAL:
+                ((HeboVisualMessageHolder) holder).bind(message);
         }
     }
 
-
     private class SentMessageHolder extends RecyclerView.ViewHolder {
-        TextView messageText;
+        RecyclerView mResponseRecycler;
+        ResponseListAdapter mResponseAdapter;
+        View view;
 
         SentMessageHolder(View itemView) {
             super(itemView);
-
-            messageText = (TextView) itemView.findViewById(R.id.text_message_body);
+            view = itemView;
+            mResponseRecycler = (RecyclerView) itemView.findViewById(R.id.recyclerview_sent_response);
         }
 
         void bind(Message message) {
-            messageText.setText(message.getMessage());
+            mResponseAdapter = new ResponseListAdapter(view.getContext(), message.getResponses());
+            mResponseRecycler.setLayoutManager(new LinearLayoutManager(view.getContext()));
+            mResponseRecycler.setAdapter(mResponseAdapter);
         }
     }
 
-    private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
-        TextView messageText, nameText;
-        ImageView profileImage;
+    private class HeboTextMessageHolder extends RecyclerView.ViewHolder {
+        RecyclerView mResponseRecycler;
+        ResponseListAdapter mResponseAdapter;
+        View view;
 
-        ReceivedMessageHolder(View itemView) {
+        HeboTextMessageHolder(View itemView) {
             super(itemView);
-
-            messageText = (TextView) itemView.findViewById(R.id.text_message_body);
-//            nameText = (TextView) itemView.findViewById(R.id.text_message_name);
-//            profileImage = (ImageView) itemView.findViewById(R.id.image_message_profile);
+            view = itemView;
+            mResponseRecycler = (RecyclerView) itemView.findViewById(R.id.recyclerview_hebo_response);
         }
 
         void bind(Message message) {
-            messageText.setText(message.getMessage());
-//            nameText.setText("Hebo");
+            mResponseAdapter = new ResponseListAdapter(view.getContext(), message.getResponses());
+            mResponseRecycler.setLayoutManager(new LinearLayoutManager(view.getContext()));
+            mResponseRecycler.setAdapter(mResponseAdapter);
+        }
+    }
+
+    private class HeboVisualMessageHolder extends RecyclerView.ViewHolder {
+        RecyclerView mResponseRecycler;
+        ResponseListAdapter mResponseAdapter;
+        TextView title;
+        View view;
+
+        HeboVisualMessageHolder(View itemView) {
+            super(itemView);
+            view = itemView;
+            title = (TextView) itemView.findViewById(R.id.visual_title);
+            mResponseRecycler = (RecyclerView) itemView.findViewById(R.id.recyclerview_visual_response);
+        }
+
+        void bind(Message message) {
+            mResponseAdapter = new ResponseListAdapter(view.getContext(), message.getResponses());
+            mResponseRecycler.setLayoutManager(new LinearLayoutManager(view.getContext()));
+            mResponseRecycler.setAdapter(mResponseAdapter);
+            title.setText(message.getMessageTitle());
         }
     }
 }

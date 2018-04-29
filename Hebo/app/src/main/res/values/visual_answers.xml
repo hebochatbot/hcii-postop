@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="VASELINE_RESPONSE">
+        <item>How much Vaseline to apply:</item>
+        <item>You should apply this much Vaseline! The more Vaseline, the better it is for the healing process.</item>
+        <item>_vaseline.jpg</item>
+    </string-array>
+
+    <string-array name="APPLY_PRESSURE_RESPONSE">
+        <item>How to apply pressure:</item>
+        <item>1. Please keep your dressing on when you\'re trying to stop the bleeding. Grab a towel, preferably a dark towel, and roll it up so that it will be easier for you to grip on both ends.</item>
+        <item>_towel.jpg</item>
+        <item>2. Find an area where you can lay down on your wound, preferably a reclining chair or on your bed.</item>
+        <item>_find_spot.jpg</item>
+        <item>3. Apply the most direct pressure on your wound area by putting the entire weight of your head against your wound. Keep applying pressure for 30 minutes until your bleeding stops.</item>
+        <item>_pressure.jpg</item>
+    </string-array>
+
+    <string-array name="CHANGE_BANDAGE_RESPONSE">
+        <item>How to change dressing:</item>
+        <item>For this, you will need any type of bandage and dressing that is big enough to cover your wound.</item>
+        <item>_wound.jpg</item>
+        <item>1. Gently dab your wound area with warm water and soap.</item>
+        <item>_clean.jpg</item>
+        <item>2. Using cotton tip applicators, apply a lot of vaseline on your wound</item>
+        <item>_vaseline.jpg</item>
+        <item>3. If your dressing is not sticking on your wound site, try to put the vaseline directly on the dressing instead of the wound.</item>
+        <item>_dressing_with_vaseline.jpg</item>
+        <item>Note: The bandage should be bigger than the size of the wound and should be sticky all the way around.</item>
+        <item>4. Lightly set the bandage on top of the wound and do not squeeze it down, or else the vaseline will spill out. Press around the edges of the bandage so it can stick around the wound area.</item>
+        <item>_put_bandage_on.jpg</item>
+    </string-array>
+
+    <string-array name="CHANGE_GAUZE_RESPONSE">
+        <item>How to change dressing:</item>
+        <item>For this, you will need Telfa (or any type of non-stick dressing), gauze, and tape.</item>
+        <item>_materials.jpg</item>
+        <item>_wound.jpg</item>
+        <item>1. Gently dab your wound area with warm water and soap.</item>
+        <item>_clean.jpg</item>
+        <item>2. Cut the non-stick dressing to be slightly larger than the size of your wound.</item>
+        <item>_telfa_before.jpg</item>
+        <item>_telfa_after.jpg</item>
+        <item>3. Using cotton tip applicators, apply a lot of vaseline on your wound.</item>
+        <item>_vaseline.jpg</item>
+        <item>4. Place the non-stick dressing on the wound and layer a piece of gauze on top of the non-stick dressing.</item>
+        <item>_nonstick.jpg</item>
+        <item>_gauze.jpg</item>
+        <item>5. Secure the dressing with tape. Make sure the tape is around the gauze and overlapping each other.</item>
+        <item>_tape.jpg</item>
+        <item>6. Add additional layers of tape until dressing is secured. That\'s it, you\'re all set to go!</item>
+        <item>_more_tape.jpg</item>
+    </string-array>
+</resources>

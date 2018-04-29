@@ -1,28 +1,34 @@
 package postop.hcii.hebo;
 
-import java.util.Date;
+import java.util.List;
 
-class Message {
-    String message;
-    Date createdAt;
-    boolean isHebo;
+public class Message {
+    List<Response> mResponses;
+    int mType;
+    String mTitle;
 
-    Message(String msg, boolean heboStatus) {
-        message = msg;
-        Date t = new Date();
-        createdAt = t;
-        isHebo = heboStatus;
+    Message(List<Response> responses, int messageType, String title) {
+        mResponses = responses;
+        mType = messageType;
+        mTitle = title;
     }
 
-    public boolean isHebo() {
-        return isHebo;
+    Message(List<Response> responses, int messageType) {
+        mResponses = responses;
+        mType = messageType;
+        mTitle = null;
     }
 
-    public String getMessage() {
-        return message;
+    public int getMessageType() {
+        return mType;
     }
 
-    public String getCreatedAt() {
-        return createdAt.toString();
+    public String getMessageTitle() {
+        return mTitle;
     }
+
+    public List<Response> getResponses() {
+        return mResponses;
+    }
+
 }
