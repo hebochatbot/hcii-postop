@@ -12,6 +12,13 @@ const upcomingSurgery = (timeOfSurgery, timeOfNow) => {
     return timeElapsed < 0;
 }
 
+const formatTime = (timeOfSurgery) => {
+  const time = timeOfSurgery.toLocaleTimeString();
+  const tail = ":00 AM".length;
+  const AMPM = "AM".length;
+  return time.substring(0, time.length-tail) + " " + time.substring(time.length-AMPM);
+}
+
 /*
 * HTTP Cloud Function.
 *
@@ -27,10 +34,6 @@ exports.heboHttp = function heboHttp (req, res) {
     const contexts = req.body.result.contexts;
     const timeOfSurgery = new Date(params["date-time"]);;
     const surgeryArea = params["body-parts"];
-
-    for (let c = 0; c < contexts.length; c++) {
-      console.log(JSON.stringify(contexts[c]));
-    }
     
     switch (intentName) {
 
@@ -62,7 +65,7 @@ exports.heboHttp = function heboHttp (req, res) {
           response = speech = "You can change your dressing now. You should be changing your dressing daily or when it gets wet.";
         } else {
           response = speech = "I recommend you wait until " + timeOfSurgery.toDateString() + " at " +
-                     timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+                     formatTime(timeOfSurgery) + " to change your dressing.";
         }
         break;
 
@@ -75,7 +78,7 @@ exports.heboHttp = function heboHttp (req, res) {
         } else {
             timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
             response = speech = "Please avoid getting the wound and dressing wet for now. Wait until 48 hours after your surgery, " +
-                        timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + ". When that time comes, let me know if you need any help!";
+                        timeOfSurgery.toDateString() + " at " + formatTime(timeOfSurgery) + ". When that time comes, let me know if you need any help!";
         }
         break;
 
@@ -85,7 +88,7 @@ exports.heboHttp = function heboHttp (req, res) {
         } else {
             timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
             response = speech = "When you change your dressing at home, it will look smaller than the pressure dressing that your doctor used. Be sure to wait until " +
-                        timeOfSurgery.toDateString() + " at " + timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+                        timeOfSurgery.toDateString() + " at " + formatTime(timeOfSurgery) + " to change your dressing.";
         }
         break;
 
@@ -109,7 +112,7 @@ exports.heboHttp = function heboHttp (req, res) {
         } else {
             timeOfSurgery.setDate(timeOfSurgery.getDate() + FORTY_EIGHT_HOURS_LATER);
             response = speech = "I recommend you wait until " + timeOfSurgery.toDateString() + " at " +
-                       timeOfSurgery.toLocaleTimeString() + " to change your dressing. Once 48 hours has passed, you can use a damp cloth to help loosen your bandage, if it's still stuck.";
+                       formatTime(timeOfSurgery) + " to change your dressing. Once 48 hours has passed, you can use a damp cloth to help loosen your bandage, if it's still stuck.";
         }
         break;
 
@@ -122,7 +125,7 @@ exports.heboHttp = function heboHttp (req, res) {
         }
         break;
 
-      case "how-can-i-stop-my-bleeding - how": //TODO: Timing
+      case "how-can-i-stop-my-bleeding - how":
         // join this together with i am still bleeding and have a variable to track the last time the user said that to see if multiple times in a few hours
         speech = "Here is how you can stop the bleeding."
         response = "(APPLY_PRESSURE_RESPONSE)";
@@ -181,7 +184,7 @@ exports.heboHttp = function heboHttp (req, res) {
           response = speech = "You should change your dressing and clean the wound area.";
         } else {
           response = speech = "Great! It's best to leave your dressing alone. Wait until " + timeOfSurgery.toDateString() + " at " +
-                     timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+                     formatTime(timeOfSurgery) + " to change your dressing.";
         }
         break;
 
@@ -193,7 +196,7 @@ exports.heboHttp = function heboHttp (req, res) {
           response = speech = "You should replace your dressing whenever it gets wet.";
         } else {
           response = speech = "It's best to leave your dressing alone. For now you can try to pat it dry. Wait until " + timeOfSurgery.toDateString() + " at " +
-                     timeOfSurgery.toLocaleTimeString() + " to change your dressing.";
+                     formatTime(timeOfSurgery) + " to change your dressing.";
         }
         break;
 
@@ -212,7 +215,7 @@ exports.heboHttp = function heboHttp (req, res) {
           response = speech = "You can change your dressing now. You should be changing your dressing daily or when it gets wet.";
         } else {
           response = speech = "You can change your dressing on" + timeOfSurgery.toDateString() + " at " +
-                     timeOfSurgery.toLocaleTimeString() + ".";
+                     formatTime(timeOfSurgery) + ".";
         }
         break;
 

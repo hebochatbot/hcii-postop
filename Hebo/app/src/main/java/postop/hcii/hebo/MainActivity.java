@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -67,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private boolean isBleedingInitial, isBleedingFinal = false;
     private String BODY_PART, DATE_TIME;
     private boolean gaveConsent;
+    private String lastIntent = "";
+    private int lastIntentCount = 0;
 
     private ImageView listenButton;
     private android.os.Handler mHandler = new android.os.Handler();
@@ -376,7 +379,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     public void onResult(final AIResponse response) {
         Result result = response.getResult();
-
         String resolvedQuery = result.getResolvedQuery();
         Log.d("Me", resolvedQuery);
         Log.d("Hebo", result.getFulfillment().getSpeech().toString());
@@ -397,29 +399,43 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         addTextMessage(resolvedQuery, false);
 
         // is a visual answer, display visual response from Hebo
-
-        if (displayText.charAt(0) == '(' && displayText.charAt(displayText.length()-1) == ')') {
-            String visual_key = displayText.substring(1, displayText.length()-1);
+        if (lastIntent.equals(result.getMetadata().getIntentName())) {
+            // we just saw this intent
+            String arrayId = (lastIntent.equals("Error (Fallback) Intent") || lastIntentCount > Config.ERR_THRESHOLD) ? "fallback" : "repeat";
             Resources res = this.getResources();
-            int responsesId = res.getIdentifier(visual_key, "array", getPackageName());
-            final List<String> responses = Arrays.asList(res.getStringArray(responsesId));
-            addVisualMessage(responses);
+            int responsesId = res.getIdentifier(arrayId, "array", getPackageName());
+            final List<String> fallbacks = Arrays.asList(res.getStringArray(responsesId));
+            Random r = new Random();
+            int randIndex = r.nextInt(fallbacks.size());
+            speech = fallbacks.get(randIndex);
+            addTextMessage(speech, true);
+            lastIntentCount++;
         } else {
-            if (isBleedingFinal && isBleedingInitial) {
-                AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
-                AIOutputContext isNotBleeding = result.getContext("bleeding-no");
+            lastIntent = result.getMetadata().getIntentName();
+            lastIntentCount = 0;
 
-                if (isStillBleeding != null) {
-                    speech = "I'm sorry to see that you've been bleeding for the last hour. Let's call doctor Carroll now for further instructions.";
-                    addTextMessage("I'm sorry to see that you've been bleeding for the last hour. Let's call Dr. Carroll now for futher instructions.", true);
-                } else if (isNotBleeding != null) {
-                    speech = "That's good to hear! Let me know if you have any more questions.";
-                    addTextMessage(speech, true);
+            if (displayText.charAt(0) == '(' && displayText.charAt(displayText.length()-1) == ')') {
+                String visual_key = displayText.substring(1, displayText.length()-1);
+                Resources res = this.getResources();
+                int responsesId = res.getIdentifier(visual_key, "array", getPackageName());
+                final List<String> responses = Arrays.asList(res.getStringArray(responsesId));
+                addVisualMessage(responses);
+            } else {
+                if (isBleedingFinal && isBleedingInitial) {
+                    AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
+                    AIOutputContext isNotBleeding = result.getContext("bleeding-no");
+
+                    if (isStillBleeding != null) {
+                        speech = "I'm sorry to see that you've been bleeding for the last hour. Let's call doctor Carroll now for further instructions.";
+                        addTextMessage("I'm sorry to see that you've been bleeding for the last hour. Let's call Dr. Carroll now for futher instructions.", true);
+                    } else if (isNotBleeding != null) {
+                        speech = "That's good to hear! Let me know if you have any more questions.";
+                        addTextMessage(speech, true);
+                    }
+                    isBleedingFinal = isBleedingInitial = false;
                 }
-                isBleedingFinal = isBleedingInitial = false;
-            }
 
-            else if (isBleedingInitial) {
+                else if (isBleedingInitial) {
                     AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
                     AIOutputContext isNotBleeding = result.getContext("bleeding-no");
 
@@ -432,15 +448,16 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                         addTextMessage(speech, true);
                         isBleedingFinal = isBleedingInitial = false;
                     }
-            }
+                }
 
-            else {
-                // display text response from Hebo
-                addTextMessage(displayText, true);
+                else {
+                    // display text response from Hebo
+                    addTextMessage(displayText, true);
 
-                AIOutputContext startTimer = result.getContext("start-timer");
-                if (startTimer!= null) {
-                    addTimerMessage();
+                    AIOutputContext startTimer = result.getContext("start-timer");
+                    if (startTimer!= null) {
+                        addTimerMessage();
+                    }
                 }
             }
         }

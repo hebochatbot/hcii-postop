@@ -24,4 +24,5 @@ package postop.hcii.hebo;
 
     public static final String DEFAULT_SITE = "neck";
     public static final int TIMER_START_VALUE = 10000; //1800000; // 30 minute timer
+    public static final int ERR_THRESHOLD = 1; // if intent is repeated ERR_THRESHOLD times, we should recommend calling
 }
