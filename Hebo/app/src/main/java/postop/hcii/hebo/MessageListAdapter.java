@@ -1,16 +1,13 @@
 package postop.hcii.hebo;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -18,9 +15,11 @@ public class MessageListAdapter extends RecyclerView.Adapter{
     private static final int VIEW_TYPE_MESSAGE_SENT = Config.MESSAGE_SENT;
     private static final int VIEW_TYPE_MESSAGE_HEBO_TEXT = Config.MESSAGE_HEBO_TEXT;
     private static final int VIEW_TYPE_MESSAGE_HEBO_VISUAL = Config.MESSAGE_HEBO_VISUAL;
+    private static final int VIEW_TYPE_MESSAGE_HEBO_TIMER = Config.MESSAGE_HEBO_TIMER;
 
     private Context mContext;
     private List<Message> mMessageList;
+    private Timer timer;
 
     public MessageListAdapter(Context context, List<Message> messageList) {
         mContext = context;
@@ -57,6 +56,10 @@ public class MessageListAdapter extends RecyclerView.Adapter{
                 view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.item_message_hebo_visual, parent, false);
                 return new HeboVisualMessageHolder(view);
+            case VIEW_TYPE_MESSAGE_HEBO_TIMER:
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_message_hebo_timer, parent, false);
+                return new HeboTimerMessageHolder(view);
             default: return null;
         }
     }
@@ -75,6 +78,10 @@ public class MessageListAdapter extends RecyclerView.Adapter{
                 break;
             case VIEW_TYPE_MESSAGE_HEBO_VISUAL:
                 ((HeboVisualMessageHolder) holder).bind(message);
+                break;
+            case VIEW_TYPE_MESSAGE_HEBO_TIMER:
+                ((HeboTimerMessageHolder) holder).bind(message);
+                break;
         }
     }
 
@@ -134,4 +141,25 @@ public class MessageListAdapter extends RecyclerView.Adapter{
             title.setText(message.getMessageTitle());
         }
     }
+
+    private class HeboTimerMessageHolder extends RecyclerView.ViewHolder {
+        TextView timerText;
+        Button cancelButton;
+
+        HeboTimerMessageHolder(View itemView) {
+            super(itemView);
+            timerText = (TextView) itemView.findViewById(R.id.timer);
+            cancelButton = (Button) itemView.findViewById(R.id.timerCancelButton);
+        }
+
+        void bind(Message message) {
+            List<Response> responses = message.getResponses();
+            Response r = responses.get(0);
+            String isSecond = r.getResponse();
+            timer = new Timer(itemView.getContext(), timerText, cancelButton, Boolean.valueOf(isSecond));
+            timer.startTimer();
+        }
+    }
+
+    public Timer getTimer() { return timer; }
 }

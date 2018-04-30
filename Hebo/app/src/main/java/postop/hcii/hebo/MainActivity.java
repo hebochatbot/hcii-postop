@@ -4,15 +4,20 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +29,7 @@ import ai.api.android.AIService;
 import ai.api.model.AIContext;
 import ai.api.model.AIEvent;
 import ai.api.model.AIError;
+import ai.api.model.AIOutputContext;
 import ai.api.model.AIResponse;
 import ai.api.model.AIRequest;
 import ai.api.model.Result;
@@ -52,12 +58,13 @@ import android.widget.ImageView;
 public class MainActivity extends AppCompatActivity implements RecognitionListener {
 
     public static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-    public static final int VISUAL_ANSWER_OFFSET = 150;
+    public static final int VISUAL_ANSWER_OFFSET = 160;
     private SharedPreferences sharedPref;
 
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private boolean isFollowUp = false;
+    private boolean isBleedingInitial, isBleedingFinal = false;
     private String BODY_PART, DATE_TIME;
     private boolean gaveConsent;
 
@@ -71,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private TextToSpeech textToSpeech;
     private Config CONFIG;
     private Button consentCancel, consentAgree;
+    private Timer currentTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +88,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         Calendar c = Calendar.getInstance();
         String currentDate = getDate(c);
         String currentTime = getTime(c);
+
+        Bundle b = getIntent().getExtras();
+        if (b != null) {
+            isBleedingInitial = b.getBoolean("bleeding_initial", false);
+            isBleedingFinal = b.getBoolean("bleeding_final", false);
+        }
 
         sharedPref = this.getSharedPreferences("profile", Context.MODE_PRIVATE);
         DATE_TIME = sharedPref.getString("date", currentDate) + " at " + sharedPref.getString("time", currentTime);
@@ -121,18 +135,35 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
         });
 
+        // Configure notifications
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManagerCompat.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(Config.NOTIFICATION_CHANNEL, "Notification", importance);
+            channel.setDescription("Hebo notifications");
+            channel.enableLights(true);
+            channel.setLightColor(Color.GREEN);
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{0, 100, 1000});
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+
         // if first time user, bring up onboarding activity
         boolean isUserFirstTime = Boolean.valueOf(sharedPref.getString("isFirstTimeUser", "true"));
         Intent introIntent = new Intent(MainActivity.this, Onboarding.class);
-//        if (isUserFirstTime) { TODO: REMOVE WHEN NOT TESTING
+        if (isUserFirstTime) { //TODO: REMOVE WHEN NOT TESTING
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.clear().commit();
             startActivity(introIntent);
-//        }
+        }
 
         // bring up consent & permissions
         if (!gaveConsent) createConsentDialog();
         if (doesNotHavePermission()) getPermissions();
+
+        bleedingTimerCheck();
     }
 
     @Override
@@ -149,6 +180,20 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 }
                 return;
             }
+        }
+    }
+
+    private void bleedingTimerCheck() {
+        if (isBleedingInitial && isBleedingFinal) {
+            String speech = "Checking in again on the bleeding. Is your " + BODY_PART + " still bleeding?";
+            addTextMessage(speech, true);
+            textToSpeech.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+            return;
+        } else if (isBleedingInitial) {
+            String speech = "Hey! How is it going, are you still bleeding?";
+            addTextMessage(speech, true);
+            textToSpeech.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+            return;
         }
     }
 
@@ -191,6 +236,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         int position = mMessageAdapter.getItemCount() - 1;
         mMessageAdapter.notifyItemInserted(position);
         mMessageRecycler.scrollBy(0, VISUAL_ANSWER_OFFSET);
+    }
+
+    public void addTimerMessage() {
+        List<Response> responseList = new ArrayList<>();
+        String isSecond = (isBleedingInitial) ? "true" : "false";
+        Response response = new Response(isSecond, false);
+        responseList.add(response);
+        Message myMessage = new Message(responseList, Config.MESSAGE_HEBO_TIMER);
+        messageList.add(myMessage);
+        int position = mMessageAdapter.getItemCount() - 1;
+        mMessageAdapter.notifyItemInserted(position);
+        mMessageRecycler.scrollToPosition(position);
+        currentTimer = mMessageAdapter.getTimer();
     }
 
     public void populateResponseList(List<Response> responseList, List<String> stringList) {
@@ -289,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
                 if (!android.text.TextUtils.isEmpty(query)) request.setQuery(query);
                 if (!android.text.TextUtils.isEmpty(event)) request.setEvent(new AIEvent(event));
-                final String contextString = params[2];
+                final String contextString = (isBleedingInitial || isBleedingFinal) ? Config.STILL_BLEEDING : params[2];
                 ai.api.RequestExtras requestExtras = null;
                 if(!android.text.TextUtils.isEmpty(contextString)) {
                     final java.util.List<AIContext> contexts = java.util.Collections.singletonList(new AIContext(contextString));
@@ -319,14 +377,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onResult(final AIResponse response) {
         Result result = response.getResult();
 
-//        // Get parameters
-//        String parameterString = "";
-//        if (result.getParameters() != null && !result.getParameters().isEmpty()) {
-//            for (final Map.Entry<String, JsonElement> entry : result.getParameters().entrySet()) {
-//                parameterString += "(" + entry.getKey() + ", " + entry.getValue() + ") ";
-//            }
-//        }
-
         String resolvedQuery = result.getResolvedQuery();
         Log.d("Me", resolvedQuery);
         Log.d("Hebo", result.getFulfillment().getSpeech().toString());
@@ -347,6 +397,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         addTextMessage(resolvedQuery, false);
 
         // is a visual answer, display visual response from Hebo
+
         if (displayText.charAt(0) == '(' && displayText.charAt(displayText.length()-1) == ')') {
             String visual_key = displayText.substring(1, displayText.length()-1);
             Resources res = this.getResources();
@@ -354,8 +405,44 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             final List<String> responses = Arrays.asList(res.getStringArray(responsesId));
             addVisualMessage(responses);
         } else {
-            // display text response from Hebo
-            addTextMessage(displayText, true);
+            if (isBleedingFinal && isBleedingInitial) {
+                AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
+                AIOutputContext isNotBleeding = result.getContext("bleeding-no");
+
+                if (isStillBleeding != null) {
+                    speech = "I'm sorry to see that you've been bleeding for the last hour. Let's call doctor Carroll now for further instructions.";
+                    addTextMessage("I'm sorry to see that you've been bleeding for the last hour. Let's call Dr. Carroll now for futher instructions.", true);
+                } else if (isNotBleeding != null) {
+                    speech = "That's good to hear! Let me know if you have any more questions.";
+                    addTextMessage(speech, true);
+                }
+                isBleedingFinal = isBleedingInitial = false;
+            }
+
+            else if (isBleedingInitial) {
+                    AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
+                    AIOutputContext isNotBleeding = result.getContext("bleeding-no");
+
+                    if (isStillBleeding != null) {
+                        speech = "Sorry to hear that you're still bleeding! Let's try to apply pressure for 30 more minutes on your " + BODY_PART + ". If you need help, just ask me 'how to apply pressure' for more detailed instructions.";
+                        addTextMessage(speech, true);
+                        addTimerMessage();
+                    } else if (isNotBleeding != null) {
+                        speech = "Great job stopping the bleeding! If you have any more questions, just let me know.";
+                        addTextMessage(speech, true);
+                        isBleedingFinal = isBleedingInitial = false;
+                    }
+            }
+
+            else {
+                // display text response from Hebo
+                addTextMessage(displayText, true);
+
+                AIOutputContext startTimer = result.getContext("start-timer");
+                if (startTimer!= null) {
+                    addTimerMessage();
+                }
+            }
         }
 
         // Read out the response
@@ -454,6 +541,32 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 dialog.dismiss();
             }
         });
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (currentTimer == null) return;
+        outState.putLong("millisLeft", currentTimer.getTimeLeftInMillis());
+        outState.putBoolean("timerRunning", currentTimer.getTimerRunning());
+        outState.putLong("endTime", currentTimer.getEndTime());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (currentTimer == null) return;
+        currentTimer.setTimeLeftInMillis(savedInstanceState.getLong("millisLeft"));
+        currentTimer.setTimerRunning(savedInstanceState.getBoolean("timerRunning"));
+        currentTimer.updateCountDownText();
+
+        if (currentTimer.getTimerRunning()) {
+            long endTime = savedInstanceState.getLong("endTime");
+            currentTimer.setEndTime(endTime);
+            currentTimer.setTimeLeftInMillis(endTime - System.currentTimeMillis());
+            currentTimer.startTimer();
+        }
     }
 }
 

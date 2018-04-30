@@ -28,6 +28,10 @@ exports.heboHttp = function heboHttp (req, res) {
     const timeOfSurgery = new Date(params["date-time"]);;
     const surgeryArea = params["body-parts"];
 
+    for (let c = 0; c < contexts.length; c++) {
+      console.log(JSON.stringify(contexts[c]));
+    }
+    
     switch (intentName) {
 
       // DIALOG

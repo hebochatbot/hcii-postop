@@ -7,8 +7,9 @@ package postop.hcii.hebo;
  final class Config {
     private Config() {}
     public static final String DIALOGFLOW_API_KEY = "9db2ebf5fd0c406980227d238be8fcca";
-    public static final String PACKAGE_NAME = "postop.hcii.hebo";
     public static final String VISUAL_IMAGES_URL = "https://raw.githubusercontent.com/daniellehu/hcii-postop/master/Hebo/app/src/main/assets/";
+    public static final String NOTIFICATION_CHANNEL = "Notifications";
+    public static final String STILL_BLEEDING = "still-bleeding";
 
     public static final int PROFILE_SITE = 0x1;
     public static final int PROFILE_DATE = 0x2;
@@ -19,6 +20,8 @@ package postop.hcii.hebo;
     public static final int MESSAGE_SENT = 1;
     public static final int MESSAGE_HEBO_TEXT = 2;
     public static final int MESSAGE_HEBO_VISUAL = 3;
+    public static final int MESSAGE_HEBO_TIMER = 4;
 
-    public static final String DEFAULT_SITE = "head";
+    public static final String DEFAULT_SITE = "neck";
+    public static final int TIMER_START_VALUE = 10000; //1800000; // 30 minute timer
 }
