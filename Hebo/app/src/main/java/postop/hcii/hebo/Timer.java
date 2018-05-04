@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
@@ -56,8 +57,9 @@ public class Timer {
             @Override
             public void onFinish() {
                 mTimerRunning = false;
+                mCountDownTimer.cancel();
                 disableCancelButton();
-
+                mTimerText.setText("00:00");
                 Intent intent = new Intent(mContext, MainActivity.class);
                 intent.setFlags((Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 if (mIsSecondTimer) {
@@ -69,12 +71,14 @@ public class Timer {
                         .setSmallIcon(R.drawable.heboicon)
                         .setContentTitle("Hebo")
                         .setContentText("How's it going? Are you still bleeding?")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setContentIntent(pendingIntent)
                         .setAutoCancel(true);
 
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mContext);
                 notificationManager.notify(0, mBuilder.build());
+                Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(1000);
             }
         }.start();
 

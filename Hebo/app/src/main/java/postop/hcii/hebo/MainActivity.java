@@ -35,6 +35,8 @@ import ai.api.model.AIRequest;
 import ai.api.model.Result;
 import ai.api.AIDataService;
 import ai.api.RequestExtras;
+
+import com.bumptech.glide.Glide;
 import com.google.gson.JsonElement;
 
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public static final int VISUAL_ANSWER_OFFSET = 160;
     private SharedPreferences sharedPref;
 
-    private SpeechRecognizer speech = null;
+    private SpeechRecognizer speechRecognizer = null;
     private Intent recognizerIntent;
     private boolean isFollowUp = false;
     private boolean isBleedingInitial, isBleedingFinal = false;
@@ -111,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mMessageRecycler.setAdapter(mMessageAdapter);
 
         // Configure speech to text
-        speech = SpeechRecognizer.createSpeechRecognizer(this);
-        speech.setRecognitionListener(this);
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        speechRecognizer.setRecognitionListener(this);
         recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en");
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         // Configure notifications
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManagerCompat.IMPORTANCE_DEFAULT;
+            int importance = NotificationManagerCompat.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(Config.NOTIFICATION_CHANNEL, "Notification", importance);
             channel.setDescription("Hebo notifications");
             channel.enableLights(true);
@@ -156,11 +158,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         // if first time user, bring up onboarding activity
         boolean isUserFirstTime = Boolean.valueOf(sharedPref.getString("isFirstTimeUser", "true"));
         Intent introIntent = new Intent(MainActivity.this, Onboarding.class);
-        if (isUserFirstTime) { //TODO: REMOVE WHEN NOT TESTING
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.clear().commit();
-            startActivity(introIntent);
-        }
+//        if (isUserFirstTime) { //TODO: REMOVE WHEN NOT TESTING
+         if (!isBleedingInitial) {
+             SharedPreferences.Editor editor = sharedPref.edit();
+             editor.clear().commit();
+             startActivity(introIntent);
+         }
+//        }
 
         // bring up consent & permissions
         if (!gaveConsent) createConsentDialog();
@@ -393,7 +397,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         displayText = (displayText == null) ? speech : displayText;
 
         // follow up question, so do not send parameters next time
-        isFollowUp = (displayText.charAt(displayText.length()-1) == '?');
+        if (result.getMetadata().getIntentName() != null &&
+                result.getMetadata().getIntentName().equals("can-i-change-dressing")) { // TODO: hardcoded
+            isFollowUp = false;
+        } else {
+            isFollowUp = (displayText.charAt(displayText.length()-1) == '?');
+        }
+
+
 
         // display my text input
         addTextMessage(resolvedQuery, false);
@@ -411,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             addTextMessage(speech, true);
             lastIntentCount++;
         } else {
-            lastIntent = result.getMetadata().getIntentName();
+            lastIntent = (result.getMetadata().getIntentName() != null) ? result.getMetadata().getIntentName() : "";
             lastIntentCount = 0;
 
             if (displayText.charAt(0) == '(' && displayText.charAt(displayText.length()-1) == ')') {
@@ -502,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 message = "No match";
                 break;
             case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                message = "RecognitionService busy";
+                message = "Please give me a moment, my backend is processing!";
                 break;
             case SpeechRecognizer.ERROR_SERVER:
                 message = "error from server";

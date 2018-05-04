@@ -42,7 +42,7 @@ exports.heboHttp = function heboHttp (req, res) {
       // Is it still bleeding? I'm not sure.
       // Let's check - is it? Yes.
       // You should apply pressure instead. How?
-      case "can-i-change-dressing - unsure - yes - how":
+      case "can-i-change-dressing-if-bleeding - unsure - yes - how":
         speech = "Here are instructions on how to apply pressure."
         response = "(APPLY_PRESSURE_RESPONSE)";
         break;
@@ -51,7 +51,7 @@ exports.heboHttp = function heboHttp (req, res) {
       // Can I change my dressing?
       // Is it still bleeding? Yes.
       // You should apply pressure instead. How?
-      case "can-i-change-dressing - yes - how":
+      case "can-i-change-dressing-if-bleeding - yes - how":
         speech = "Here are instructions on how to apply pressure."
         response = "(APPLY_PRESSURE_RESPONSE)";
         break;
@@ -60,7 +60,7 @@ exports.heboHttp = function heboHttp (req, res) {
       // Can I change my dressing?
       // Is it still bleeding? No.
       // You should change only if after 48 hours...
-      case "can-i-change-dressing - no":
+      case "can-i-change-dressing-if-bleeding - no":
         if (isAfterFortyEightHours(timeOfSurgery, currentTime)) {
           response = speech = "You can change your dressing now. You should be changing your dressing daily or when it gets wet.";
         } else {

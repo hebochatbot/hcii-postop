@@ -46,7 +46,7 @@
     <!-- Fallback ~-->
     <string-array name="fallback">
         <item>I\'m sorry, I still don\'t know how to answer that. I can only answer questions about wound care, bleeding, and swelling. Please refer to your post-operative instruction sheet to see if the answer is there. In cases of emergency, you should call 911.</item>
-        <item>Sorry! I don\'t think I know how to answer that still. I can only answer questions about wound care, bleeding, and swelling. If this is an emergency, you should call 911. If this isn't an emergency, try referring to your post-operative instruction sheet for the answer. If you still can\'t find the answer, you can contact your physician.</item>
+        <item>Sorry! I don\'t think I know how to answer that still. I can only answer questions about wound care, bleeding, and swelling. If this is an emergency, you should call 911. If this isn\'t an emergency, try referring to your post-operative instruction sheet for the answer. If you still can\'t find the answer, you can contact your physician.</item>
     </string-array>
     <string-array name="repeat">
         <item>I think I\'m not understanding you correctly. Can you try asking another way?</item>

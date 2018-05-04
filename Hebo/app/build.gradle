@@ -32,4 +32,6 @@ dependencies {
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation 'ai.api:libai:1.6.12'
     implementation 'com.google.code.gson:gson:2.3.1'
+    implementation 'com.github.bumptech.glide:glide:4.7.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 }
