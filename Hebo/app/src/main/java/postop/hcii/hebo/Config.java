@@ -7,7 +7,7 @@ package postop.hcii.hebo;
  final class Config {
     private Config() {}
     public static final String DIALOGFLOW_API_KEY = "9db2ebf5fd0c406980227d238be8fcca";
-    public static final String VISUAL_IMAGES_URL = "https://raw.githubusercontent.com/daniellehu/hcii-postop/master/Hebo/app/src/main/assets/";
+    public static final String VISUAL_IMAGES_URL = "https://raw.githubusercontent.com/hebochatbot/hcii-postop/master/Hebo/app/src/main/assets/";
     public static final String NOTIFICATION_CHANNEL = "Notifications";
     public static final String STILL_BLEEDING = "still-bleeding";
 
