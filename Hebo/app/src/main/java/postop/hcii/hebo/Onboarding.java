@@ -23,6 +23,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+/*
+ * Activity of Onboarding new users.
+ * Everything is set-up in regards to the activity, but to change the content of Onboarding, change
+ * content of imgs, headers, and bodys from PlaceholderFragment
+ */
+
 public class Onboarding extends AppCompatActivity {
 
     /**
@@ -103,16 +109,13 @@ public class Onboarding extends AppCompatActivity {
         editor.apply();
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
+        // The fragment argument representing the section number for this fragment.
         private static final String ARG_SECTION_NUMBER = "section_number";
         ImageView img;
+
+        /* CHANGE CONTENT IN res > values > strings.xml TO EDIT ONBOARDING */
+        // imgs, headers, and bodys essentially defines the content in the Onboarding Activity
         int[] imgs = new int[]{R.drawable.heboicon, R.drawable.bleedingandwc, R.drawable.clickhebo};
         int[] headers = new int[]{R.string.onboarding1_header, R.string.onboarding2_header, R.string.onboarding3_header};
         int[] bodys = new int[]{R.string.onboarding1_body, R.string.onboarding2_body, R.string.onboarding3_body};

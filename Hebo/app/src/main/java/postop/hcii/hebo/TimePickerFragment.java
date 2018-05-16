@@ -16,6 +16,11 @@ import android.widget.TimePicker;
 
 import java.util.Calendar;
 
+/*
+ * Used for the time picker on the ProfileActivity
+ */
+
+
 public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener{
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -62,7 +67,7 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         int profileScore = sharedPref.getInt("profileScore", 0);
         profileScore |= Config.PROFILE_TIME;
 
-        Log.d("TIME PICKER", Integer.toString(profileScore));
+
         if (ProfileActivity.isFilled(profileScore)) {
             Button saveButton = (Button) getActivity().findViewById(R.id.button);
             saveButton.setEnabled(true);

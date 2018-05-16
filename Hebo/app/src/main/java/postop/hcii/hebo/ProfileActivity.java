@@ -22,7 +22,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-
+/*
+ * Profile activity where the user's profile is saved or loaded.
+ */
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -36,7 +38,6 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         sharedPref = this.getSharedPreferences("profile", Context.MODE_PRIVATE);
-
         dateText = (TextView) findViewById(R.id.dateText);
         timeText = (TextView) findViewById(R.id.timeText);
 
@@ -44,18 +45,15 @@ public class ProfileActivity extends AppCompatActivity {
         String currentDate = getDate(c);
         String currentTime = getTime(c);
 
-        // read from memory
+        // read from phone's memory to get profile settings
         String date = sharedPref.getString("date", "Date");
         String time = sharedPref.getString("time", "Time");
         String bodyPart = sharedPref.getString("bodyPart", "Surgery site");
         String clinic = sharedPref.getString("clinic", "Clinic");
         int bodyPartIndex = sharedPref.getInt("bodyPartIndex", -1);
         int clinicIndex = sharedPref.getInt("clinicIndex", -1);
-        Log.d("date", date);
-        Log.d("time", time);
-        Log.d("bodyPart", bodyPart);
-        Log.d("clinic", clinic);
 
+        // bitvector used to see if all options have been filled
         int profileScore = 0;
         profileScore = getUpdatedProfileScore(profileScore, bodyPart, date, time, clinic);
 
@@ -72,7 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
         dateText.setText(date);
         timeText.setText(time);
 
-        // Body part spinner
+        // Body part spinner; TO ADD BODY PARTS SEE res > values > strings.xml : body_parts
         final List<String> bodyPartsList = Arrays.asList(getResources().getStringArray(R.array.body_parts));
         bodyPartSpinner = (Spinner) findViewById(R.id.surgery_area);
         setupSpinner(bodyPartSpinner, bodyPartsList, Config.PROFILE_SITE);
@@ -80,7 +78,7 @@ public class ProfileActivity extends AppCompatActivity {
             bodyPartSpinner.setSelection(bodyPartIndex);
         }
 
-        // Clinic spinner
+        // Clinic spinner; TO ADD CLINICS SEE res > values > strings.xml : clinics
         final List<String> clinicPartList = Arrays.asList(getResources().getStringArray(R.array.clinics));
         clinicSpinner = (Spinner) findViewById(R.id.clinics);
         setupSpinner(clinicSpinner, clinicPartList, Config.PROFILE_CLINIC);

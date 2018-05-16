@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+    FORMAT OF VISUAL ANSWER:
+    <string-array name="VISUAL_ANSWER_VARIABLE"> // this VISUAL_ANSWER_VARIABLE should be returned by the webhook and surrounded by '(' & ')'
+    <item>First item is always the title:</item>
+    <item>Text response is typed normally. Caution, if you use ' in the response, you need to format it \'</item>
+    <item>_image.jpg</item> // images always start with '_' to identify it as an image. Must also be in the Github's assets folder
+    !-->
+
     <string-array name="VASELINE_RESPONSE">
         <item>How much Vaseline to apply:</item>
         <item>You should apply this much Vaseline! The more Vaseline, the better it is for the healing process.</item>

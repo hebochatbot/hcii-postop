@@ -12,6 +12,15 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+/*
+ * Response adapter: class that handles Responses; used for visual answers.
+ * We use an "Adapter" for this because there can be an arbitrary
+ * amount of text and images in visual answers.
+ *
+ * We use the ResponseListAdapter anytime we want to display either text or image
+ * in the conversation between the user and Hebo.
+ */
+
 public class ResponseListAdapter extends RecyclerView.Adapter {
     private static final int VIEW_TYPE_TEXT = 1;
     private static final int VIEW_TYPE_IMAGE = 2;

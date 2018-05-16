@@ -14,6 +14,12 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
+/*
+ * Timer class: class that initiates a timer instance. Used for features where Hebo sends
+ * a notification to the user's phone (e.g. apply pressure for 30 minutes)
+ */
+
+
 public class Timer {
     private static final long START_TIME_IN_MILLIS = Config.TIMER_START_VALUE;
 
@@ -55,11 +61,17 @@ public class Timer {
             }
 
             @Override
-            public void onFinish() {
+            public void onFinish() { // when timer finishes...
+                // stop the timer
                 mTimerRunning = false;
                 mCountDownTimer.cancel();
                 disableCancelButton();
                 mTimerText.setText("00:00");
+
+
+                // setup intent
+                // > bleeding_initial is checked if this is the first timer used to check on bleeding; if still bleeding, fire a second timer
+                // > bleeding_final is checked if this is the second timer fired to check on bleeding; if still bleeding, tell them to call clinic
                 Intent intent = new Intent(mContext, MainActivity.class);
                 intent.setFlags((Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 if (mIsSecondTimer) {
@@ -67,6 +79,8 @@ public class Timer {
                 }
                 intent.putExtra("bleeding_initial", true);
                 PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                // notify the user (check-up on them) - if they click on the notification fire the intent
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext, Config.NOTIFICATION_CHANNEL)
                         .setSmallIcon(R.drawable.heboicon)
                         .setContentTitle("Hebo")
@@ -74,7 +88,6 @@ public class Timer {
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setContentIntent(pendingIntent)
                         .setAutoCancel(true);
-
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mContext);
                 notificationManager.notify(0, mBuilder.build());
                 Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);

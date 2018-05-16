@@ -16,6 +16,9 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 
+/*
+ * Used for the date picker on the ProfileActivity
+ */
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 

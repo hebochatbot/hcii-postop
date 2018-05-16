@@ -61,18 +61,16 @@ import android.widget.ImageView;
 public class MainActivity extends AppCompatActivity implements RecognitionListener {
 
     public static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-    public static final int VISUAL_ANSWER_OFFSET = 160;
+    public static final int VISUAL_ANSWER_OFFSET = 160; // scroll offset to see top of visual answer
+    private String BODY_PART, DATE_TIME;
     private SharedPreferences sharedPref;
-
     private SpeechRecognizer speechRecognizer = null;
     private Intent recognizerIntent;
-    private boolean isFollowUp = false;
-    private boolean isBleedingInitial, isBleedingFinal = false;
-    private String BODY_PART, DATE_TIME;
-    private boolean gaveConsent;
-    private String lastIntent = "";
+    private boolean isFollowUp = false; // used when Hebo asks a follow-up question
+    private boolean isBleedingInitial, isBleedingFinal = false; // used for Bleeding logic tree
+    private boolean gaveConsent; // must give consent if asking Hebo a question
+    private String lastIntent = ""; // used to keep track of user's last intent
     private int lastIntentCount = 0;
-
     private ImageView listenButton;
     private android.os.Handler mHandler = new android.os.Handler();
     private RecyclerView mMessageRecycler;
@@ -94,17 +92,20 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String currentDate = getDate(c);
         String currentTime = getTime(c);
 
+        // gets set if user clicks notification from Timer
         Bundle b = getIntent().getExtras();
         if (b != null) {
             isBleedingInitial = b.getBoolean("bleeding_initial", false);
             isBleedingFinal = b.getBoolean("bleeding_final", false);
         }
 
+        // grab profile information from memory; defaults to current time and DEFAULT_SITE if not available
         sharedPref = this.getSharedPreferences("profile", Context.MODE_PRIVATE);
         DATE_TIME = sharedPref.getString("date", currentDate) + " at " + sharedPref.getString("time", currentTime);
         BODY_PART = sharedPref.getString("bodyPart", Config.DEFAULT_SITE);
         gaveConsent = sharedPref.getBoolean("consent", false);
 
+        // Configure general settings
         messageList = new LinkedList<>();
         listenButton = (ImageView) findViewById(R.id.listenButton);
         mMessageRecycler = (RecyclerView) findViewById(R.id.recyclerview_message_list);
@@ -122,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5000); // min 10 sec of silence
         recognizerIntent.putExtra("android.speech.extra.DICTATION_MODE", true);
-
 
         // Configure Dialogflow
         final AIConfiguration config = new AIConfiguration(CONFIG.DIALOGFLOW_API_KEY,
@@ -154,23 +154,36 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             notificationManager.createNotificationChannel(channel);
         }
 
-
-        // if first time user, bring up onboarding activity
+        // if first time user, bring up onboarding activity, else greet user
         boolean isUserFirstTime = Boolean.valueOf(sharedPref.getString("isFirstTimeUser", "true"));
         Intent introIntent = new Intent(MainActivity.this, Onboarding.class);
-//        if (isUserFirstTime) { //TODO: REMOVE WHEN NOT TESTING
-         if (!isBleedingInitial) {
-             SharedPreferences.Editor editor = sharedPref.edit();
-             editor.clear().commit();
-             startActivity(introIntent);
-         }
-//        }
+        if (isUserFirstTime) {
+         SharedPreferences.Editor editor = sharedPref.edit();
+         editor.clear().commit();
+         startActivity(introIntent);
+        } else {
+            addTextMessage("Hi! How can I help?", true);
+        }
 
         // bring up consent & permissions
         if (!gaveConsent) createConsentDialog();
         if (doesNotHavePermission()) getPermissions();
 
-        bleedingTimerCheck();
+        bleedingTimerCheck(); // check to see if this is a bleeding check-up
+    }
+
+    private void bleedingTimerCheck() {
+        if (isBleedingInitial && isBleedingFinal) { // second check-up
+            String speech = "Checking in again on the bleeding. Is your " + BODY_PART + " still bleeding?";
+            addTextMessage(speech, true);
+            textToSpeech.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+            return;
+        } else if (isBleedingInitial) { // first check-up
+            String speech = "Hey! How is it going, are you still bleeding?";
+            addTextMessage(speech, true);
+            textToSpeech.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+            return;
+        }
     }
 
     @Override
@@ -187,20 +200,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 }
                 return;
             }
-        }
-    }
-
-    private void bleedingTimerCheck() {
-        if (isBleedingInitial && isBleedingFinal) {
-            String speech = "Checking in again on the bleeding. Is your " + BODY_PART + " still bleeding?";
-            addTextMessage(speech, true);
-            textToSpeech.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
-            return;
-        } else if (isBleedingInitial) {
-            String speech = "Hey! How is it going, are you still bleeding?";
-            addTextMessage(speech, true);
-            textToSpeech.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
-            return;
         }
     }
 
@@ -222,6 +221,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED);
     }
 
+    /* HELPER FUNCTIONS TO DISPLAY CONVERSATION ITEMS (TEXT, VISUAL, TIMER) */
+
+    // Brings up text bubble with msg as text.
+    // > if isHebo=true, text bubble shows up on left side (Hebo says it)
+    // > if isHebo=false, text bubble shows up on right side (user says it)
     public void addTextMessage(String msg, boolean isHebo) {
         int messageType = (isHebo) ? Config.MESSAGE_HEBO_TEXT : Config.MESSAGE_SENT;
         Response response = new Response(msg, false);
@@ -234,6 +238,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mMessageRecycler.scrollToPosition(position);
     }
 
+    // Brings up visual answer made up of stringResponses
+    // > see file res > values > visual_answers.xml for examples of a stringResponses
     public void addVisualMessage(List<String> stringResponses) {
         List<Response> responseList = new ArrayList<>();
         String title = stringResponses.get(0); // first response is always the title
@@ -245,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mMessageRecycler.scrollBy(0, VISUAL_ANSWER_OFFSET);
     }
 
+    // Brings up and starts timer
     public void addTimerMessage() {
         List<Response> responseList = new ArrayList<>();
         String isSecond = (isBleedingInitial) ? "true" : "false";
@@ -273,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (doesNotHavePermission()) {
                 getPermissions();
             } else {
-                speech.startListening(recognizerIntent);
+                speechRecognizer.startListening(recognizerIntent);
             }
         }
         else createConsentDialog();
@@ -317,6 +324,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onReadyForSpeech(Bundle b) {
     }
 
+    // What happens after the user speaks into the mic (onResults of speech to text)
     @Override
     public void onResults(Bundle results) {
         java.util.ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -327,20 +335,20 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String currentDate = getDate(c);
         String currentTime = getTime(c);
 
+        // get profile information
         DATE_TIME = sharedPref.getString("date", currentDate) + " at " + sharedPref.getString("time", currentTime);
         BODY_PART = sharedPref.getString("bodyPart", "head");
 
-        if (isFollowUp) {
-            param_text = speech_text;
+        if (isFollowUp) { // if the last thing Hebo said was a follow-up...
+            param_text = speech_text; // DO NOT APPEND PARAMETERS (this is because we want to send 'yes' instead of '(head) (1/1/1 at 2pm) yes' -- easier to use preset follow-up responses in Dialogflow
         } else {
-            param_text = "(" + BODY_PART + ")" + " (" + DATE_TIME + ") " + speech_text;
+            param_text = "(" + BODY_PART + ")" + " (" + DATE_TIME + ") " + speech_text; // append parameters user's request
         }
         sendRequest(param_text);
         isFollowUp = false; // reset follow up
     }
 
-    private void sendRequest(final String queryString) {
-        Log.d("sent request", queryString);
+    private void sendRequest(final String queryString) { // send queryString to Dialogflow
         final String eventString = null;
         final String contextString = null;
         final android.os.AsyncTask<String, Void, AIResponse> task = new android.os.AsyncTask<String, Void, AIResponse>() {
@@ -381,50 +389,44 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         task.execute(queryString, eventString, contextString);
     }
 
+    // What happens after Dialogflow returns a response (onResult of Dialogflow)
     public void onResult(final AIResponse response) {
         Result result = response.getResult();
         String resolvedQuery = result.getResolvedQuery();
-        Log.d("Me", resolvedQuery);
-        Log.d("Hebo", result.getFulfillment().getSpeech().toString());
+
         if (resolvedQuery.charAt(0) == '(') {
             int firstInd = resolvedQuery.indexOf(")");
             int secondInd = resolvedQuery.indexOf(")", firstInd+1);
-            resolvedQuery = resolvedQuery.substring(secondInd+2);
+            resolvedQuery = resolvedQuery.substring(secondInd+2); // user's request to Hebo
         }
 
         String speech = result.getFulfillment().getSpeech().toString();
         String displayText = result.getFulfillment().getDisplayText();
         displayText = (displayText == null) ? speech : displayText;
 
-        // follow up question, so do not send parameters next time
-        if (result.getMetadata().getIntentName() != null &&
-                result.getMetadata().getIntentName().equals("can-i-change-dressing")) { // TODO: hardcoded
-            isFollowUp = false;
-        } else {
-            isFollowUp = (displayText.charAt(displayText.length()-1) == '?');
-        }
+        // Hebo asked a follow-up question, so do not send parameters next time
+        isFollowUp = (displayText.charAt(displayText.length()-1) == '?');
 
-
-
-        // display my text input
+        // display user's input
         addTextMessage(resolvedQuery, false);
 
         // is a visual answer, display visual response from Hebo
         if (lastIntent.equals(result.getMetadata().getIntentName())) {
-            // we just saw this intent
+            // we just saw this intent, have them repeat their question again
             String arrayId = (lastIntent.equals("Error (Fallback) Intent") || lastIntentCount > Config.ERR_THRESHOLD) ? "fallback" : "repeat";
             Resources res = this.getResources();
             int responsesId = res.getIdentifier(arrayId, "array", getPackageName());
             final List<String> fallbacks = Arrays.asList(res.getStringArray(responsesId));
             Random r = new Random();
             int randIndex = r.nextInt(fallbacks.size());
-            speech = fallbacks.get(randIndex);
+            speech = fallbacks.get(randIndex); // see res > values > strings.xml : fallback for list of fallbacks
             addTextMessage(speech, true);
-            lastIntentCount++;
+            lastIntentCount++; // keep track of how many times we are returning this intent... if too much, tell them to call
         } else {
             lastIntent = (result.getMetadata().getIntentName() != null) ? result.getMetadata().getIntentName() : "";
             lastIntentCount = 0;
 
+            // visual responses come back as (VISUAL_ANSWER_NAME) where VISUAL_ANSWER_NAME is name of string-array in visual_answers.xml
             if (displayText.charAt(0) == '(' && displayText.charAt(displayText.length()-1) == ')') {
                 String visual_key = displayText.substring(1, displayText.length()-1);
                 Resources res = this.getResources();
@@ -432,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 final List<String> responses = Arrays.asList(res.getStringArray(responsesId));
                 addVisualMessage(responses);
             } else {
-                if (isBleedingFinal && isBleedingInitial) {
+                if (isBleedingFinal && isBleedingInitial) { // response to give if second bleeding check-up
                     AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
                     AIOutputContext isNotBleeding = result.getContext("bleeding-no");
 
@@ -446,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     isBleedingFinal = isBleedingInitial = false;
                 }
 
-                else if (isBleedingInitial) {
+                else if (isBleedingInitial) { // response to give if first bleeding check-up
                     AIOutputContext isStillBleeding = result.getContext("bleeding-yes");
                     AIOutputContext isNotBleeding = result.getContext("bleeding-no");
 
@@ -544,7 +546,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         return Integer.toString(hour) + ":" + Integer.toString(minute) + am_pm;
     }
 
-    private void createConsentDialog() {
+    private void createConsentDialog() { // dialog box containing logic for consent
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.activity_consent, null);
         mBuilder.setView(mView);
@@ -570,7 +572,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
         });
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

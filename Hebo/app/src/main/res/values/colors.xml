@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#f5a623</color>
-    <color name="colorPrimary2">#FFF5E5</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#eeeeee</color>
-    <!--<color name="bgColor">#fffafaf</color>!-->
     <color name="bgColor">#ffffff</color>
     <color name="dialogConfirm">#00897B</color>
 

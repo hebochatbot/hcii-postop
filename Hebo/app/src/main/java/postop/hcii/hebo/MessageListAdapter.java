@@ -11,6 +11,20 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/*
+ * Message adapter: class that handles what Message to show next.
+ * We use an "Adapter" for this because there can be an arbitrary amount of "messages"
+ * that are exchanged between Hebo and the user. Adapter classes handle inflating an
+ * arbitrary amount of elements... in our case, an arbitrary amount of conversation
+ * exchanges between the user and Hebo.
+ *
+ * Currently there are 4 types:
+ * SENT - when the user asks Hebo a question
+ * TEXT - when Hebo is responding to the user in plaintext
+ * VISUAL - when Hebo is responding to the user with a visual answer
+ * TIMER - when Hebo is responding to the user with a timer
+ */
+
 public class MessageListAdapter extends RecyclerView.Adapter{
     private static final int VIEW_TYPE_MESSAGE_SENT = Config.MESSAGE_SENT;
     private static final int VIEW_TYPE_MESSAGE_HEBO_TEXT = Config.MESSAGE_HEBO_TEXT;
